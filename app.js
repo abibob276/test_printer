@@ -27,9 +27,6 @@ let activeInkassaAtmId = null;
 let pendingConfirmAction = null;
 let activeInkassaAmount = 0;
 
-// Hozir ochiq turgan swipe kartani kuzatish uchun
-let activeSwipeCard = null;
-
 window.onload = function () {
   if (window.Telegram?.WebApp) {
     Telegram.WebApp.ready();
@@ -462,29 +459,29 @@ function renderTarixView() {
     wrapper.className = "swipe-wrapper";
 
     wrapper.innerHTML = `
-      <div class="swipe-background">
-        <button class="swipe-action-btn swipe-btn-print" title="Chop etish" onclick="confirmReprint(${item.id})">
-          <i class="fa-solid fa-print"></i>
-        </button>
-        <button class="swipe-action-btn swipe-btn-delete" title="O'chirish" onclick="confirmDeleteHistoryItem(${item.id})">
-          <i class="fa-solid fa-trash-can"></i>
-        </button>
-      </div>
+    <div class="swipe-background">
+      <button class="swipe-action-btn swipe-btn-print" title="Chop etish" onclick="confirmReprint(${item.id})">
+        <i class="fa-solid fa-print"></i>
+      </button>
+      <button class="swipe-action-btn swipe-btn-delete" title="O'chirish" onclick="confirmDeleteHistoryItem(${item.id})">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
+    </div>
 
-      <div class="swipe-card-content tarix-card ${cardStatusClass}">
-        <div>
-          <div class="atm-title">${displayTime} — #${item.id}. ${item.name}</div>
-          ${
-            isBroken
-              ? `<div style="color:#dc2626; font-size:0.8rem;">Nosoz</div>`
-              : isZeroAmount
-                ? `<div class="tarix-amount-zero">0 so'm</div>`
-                : `<div class="tarix-amount">${(item.amount || 0).toLocaleString("en-US").replace(/,/g, " ")} so'm</div>`
-          }
-        </div>
-        <i class="fa-solid fa-chevron-left" style="color:#cbd5e1; font-size:0.9rem;"></i>
+    <div class="swipe-card-content tarix-card ${cardStatusClass}">
+      <div>
+        <div class="atm-title">${displayTime} — #${item.id}. ${item.name}</div>
+        ${
+          isBroken
+            ? `<div style="color:#dc2626; font-size:0.8rem;">Nosoz</div>`
+            : isZeroAmount
+              ? `<div class="tarix-amount-zero">0 so'm</div>`
+              : `<div class="tarix-amount">${(item.amount || 0).toLocaleString("en-US").replace(/,/g, " ")} so'm</div>`
+        }
       </div>
-    `;
+      <i class="fa-solid fa-chevron-left" style="color:#cbd5e1; font-size:0.9rem;"></i>
+    </div>
+  `;
 
     setupSwipeEvents(wrapper);
     listEl.appendChild(wrapper);
@@ -500,6 +497,7 @@ function setupSwipeEvents(wrapper) {
   card.addEventListener("touchstart", (e) => {
     startX = e.touches[0].clientX;
   });
+
   card.addEventListener(
     "touchmove",
     (e) => {
@@ -517,54 +515,33 @@ function setupSwipeEvents(wrapper) {
 
   card.addEventListener("touchend", () => {
     if (currentX < -50) {
-      // Agar boshqa karta ochiq bo'lsa, uni yopish
-      if (activeSwipeCard && activeSwipeCard !== card) {
-        activeSwipeCard.style.transform = `translateX(0px)`;
-        const prevOpenedWrapper = activeSwipeCard.closest(".swipe-wrapper");
-        if (prevOpenedWrapper) prevOpenedWrapper.classList.remove("swipe-open");
-      }
-
       card.style.transform = `translateX(-120px)`;
       isOpened = true;
-      activeSwipeCard = card;
-      wrapper.classList.add("swipe-open");
     } else {
       card.style.transform = `translateX(0px)`;
       isOpened = false;
-      wrapper.classList.remove("swipe-open");
-      if (activeSwipeCard === card) {
-        activeSwipeCard = null;
-      }
     }
   });
 }
+
 function confirmReprint(id) {
   const item = db.tarix.find((t) => t.id === id);
   if (!item) return;
 
-  showConfirm(
-    `<strong>#${item.id}. ${item.name}</strong><br>ushbu chek qayta chop etilsinmi?`,
-    function () {
-      if (bleState.isConnected) {
-        printReceipt(item);
-        showToast("Chek qayta chop etilmoqda", "success");
-      } else {
-        showToast("Printerga ulanmagansiz!", "error");
-      }
-    },
-  );
+  showConfirm(`Qayta chop etilsinmi?\n#${item.id}. ${item.name}`, function () {
+    if (bleState.isConnected) {
+      printReceipt(item);
+      showToast("Chek qayta chop etilmoqda", "success");
+    } else {
+      showToast("Printerga ulanmagansiz!", "error");
+    }
+  });
 }
 
 function confirmDeleteHistoryItem(id) {
-  const item = db.tarix.find((t) => t.id === id);
-  if (!item) return;
-
-  showConfirm(
-    `<strong>#${item.id}. ${item.name}</strong><br>ushbu tarix o'chirilsinmi?`,
-    function () {
-      removeFromTarixAndReturn(id);
-    },
-  );
+  showConfirm("O'chirilsinmi?", function () {
+    removeFromTarixAndReturn(id);
+  });
 }
 
 function removeFromTarixAndReturn(id) {
