@@ -3,129 +3,115 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bluetooth Printer WebApp</title>
+    <title>Canvas orqali Chek Chop Etish</title>
     <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-          Arial, sans-serif;
-      }
       body {
-        background-color: #f4f6f9;
-        color: #333;
+        font-family: sans-serif;
         padding: 20px;
+        background: #f4f6f9;
         display: flex;
-        justify-content: center;
+        flex-direction: column;
         align-items: center;
-        height: 100vh;
       }
-      .container {
-        background: #ffffff;
-        padding: 24px;
-        border-radius: 16px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      .card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         width: 100%;
-        max-width: 400px;
-      }
-      h2 {
-        font-size: 20px;
-        margin-bottom: 16px;
-        color: #111;
+        max-width: 380px;
         text-align: center;
       }
-      .form-group {
-        margin-bottom: 16px;
-      }
-      label {
-        display: block;
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 6px;
-        color: #555;
-      }
-      textarea,
-      input {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        font-size: 14px;
-        outline: none;
-        resize: vertical;
-      }
-      textarea:focus,
-      input:focus {
-        border-color: #0088cc;
+      canvas {
+        border: 1px dashed #ccc;
+        margin-bottom: 15px;
+        max-width: 100%;
+        background: #fff;
       }
       button {
         width: 100%;
         background-color: #0088cc;
         color: white;
         border: none;
-        padding: 14px;
+        padding: 12px;
         border-radius: 8px;
         font-size: 16px;
         font-weight: 600;
         cursor: pointer;
-        transition: background 0.2s;
       }
       button:active {
         background-color: #006699;
       }
-      .hint {
-        font-size: 12px;
-        color: #888;
-        text-align: center;
-        margin-top: 12px;
-      }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h2>Bluetooth Chek Chop Etish</h2>
-
-      <div class="form-group">
-        <label for="shopName">Do'kon nomi:</label>
-        <input type="text" id="shopName" value="Mening Do'konim" />
-      </div>
-
-      <div class="form-group">
-        <label for="receiptText">Chek matni:</label>
-        <textarea id="receiptText" rows="5">
-Mahsulot: Qahva (2x)
-Narxi: 30,000 UZS
-------------------
-Jami: 30,000 UZS
-Xaridingiz uchun rahmat!</textarea
-        >
-      </div>
-
-      <button onclick="sendToRawBT()">🖨️ Chop etish</button>
-
-      <div class="hint">
-        RawBT ilovasi o'rnatilgan va ulangan bo'lishi kerak.
-      </div>
+    <div class="card">
+      <h3>Canvas Chek Generator</h3>
+      <!-- Chek chiziladigan canvas (termoprinterlar uchun odatda eni 384 yoki 576 piksel bo'ladi) -->
+      <canvas id="receiptCanvas" width="384" height="250"></canvas>
+      <button onclick="printCanvasAsImage()">🖨️ Rasmni Chop Etish</button>
     </div>
 
     <script>
-      function sendToRawBT() {
-        // Inputlardan ma'lumotlarni yig'amiz
-        const shop = document.getElementById("shopName").value;
-        const text = document.getElementById("receiptText").value;
+      // Sahifa ochilganda canvas'ga chekni chizib qo'shamiz
+      window.onload = function () {
+        const canvas = document.getElementById("receiptCanvas");
+        const ctx = canvas.getContext("2d");
 
-        // Chop etiladigan yakuniy matnni shakllantiramiz (\n - yangi qator)
-        const fullText = `=== ${shop} ===\n\n${text}\n\n\n`;
+        // Orqa fonni oq qilish
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Matnni URL formatiga o'tkazamiz
-        const encodedText = encodeURIComponent(fullText);
+        // Matn sozlamalari (Faqat qora rang termoprinter uchun)
+        ctx.fillStyle = "#000000";
+        ctx.textAlign = "center";
 
-        // RawBT Intent havolasini tuzamiz
-        const intentUrl = `intent:${encodedText}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;`;
+        // Sarlavha
+        ctx.font = "bold 20px monospace";
+        ctx.fillText("MENING DO'KONIM", canvas.width / 2, 30);
 
-        // Brauzerni/WebApp'ni RawBT'ga yo'naltiramiz
+        // Ajratuvchi chiziq
+        ctx.font = "14px monospace";
+        ctx.fillText(
+          "------------------------------------------------",
+          canvas.width / 2,
+          55,
+        );
+
+        // Mahsulotlar (Chapga tekislangan)
+        ctx.textAlign = "left";
+        ctx.font = "14px monospace";
+        ctx.fillText("Mahsulot: Qahva (2x)      30,000 UZS", 20, 85);
+        ctx.fillText("Mahsulot: Non              5,000 UZS", 20, 115);
+
+        // Chiziq
+        ctx.textAlign = "center";
+        ctx.fillText(
+          "------------------------------------------------",
+          canvas.width / 2,
+          145,
+        );
+
+        // Jami
+        ctx.font = "bold 16px monospace";
+        ctx.fillText("JAMI: 35,000 UZS", canvas.width / 2, 175);
+
+        // Pastki eslatma
+        ctx.font = "12px monospace";
+        ctx.fillText("Xaridingiz uchun rahmat!", canvas.width / 2, 215);
+      };
+
+      // Canvas'ni rasmga o'tkazib RawBT'ga yuborish
+      function printCanvasAsImage() {
+        const canvas = document.getElementById("receiptCanvas");
+
+        // Canvas'ni Base64 rasm formatiga o'tkazamiz
+        const dataURL = canvas.toDataURL("image/png");
+
+        // RawBT rasmni qabul qilishi uchun maxsus intent sxemasi
+        // RawBT rasm ma'lumotlarini base64 holatida qabul qiladi
+        const intentUrl = `intent:${dataURL}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;`;
+
         window.location.href = intentUrl;
       }
     </script>
