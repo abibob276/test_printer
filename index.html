@@ -1,127 +1,133 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="uz">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bluetooth Printer WebApp</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-        body {
-            background-color: #f4f6f9;
-            color: #333;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            background: #ffffff;
-            padding: 24px;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            width: 100%;
-            max-width: 400px;
-        }
-        h2 {
-            font-size: 20px;
-            margin-bottom: 16px;
-            color: #111;
-            text-align: center;
-        }
-        .form-group {
-            margin-bottom: 16px;
-        }
-        label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #555;
-        }
-        textarea, input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            outline: none;
-            resize: vertical;
-        }
-        textarea:focus, input:focus {
-            border-color: #0088cc;
-        }
-        button {
-            width: 100%;
-            background-color: #0088cc;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        button:active {
-            background-color: #006699;
-        }
-        .hint {
-            font-size: 12px;
-            color: #888;
-            text-align: center;
-            margin-top: 12px;
-        }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+      }
+      body {
+        background-color: #f4f6f9;
+        color: #333;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .container {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 400px;
+      }
+      h2 {
+        font-size: 20px;
+        margin-bottom: 16px;
+        color: #111;
+        text-align: center;
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #555;
+      }
+      textarea,
+      input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+        resize: vertical;
+      }
+      textarea:focus,
+      input:focus {
+        border-color: #0088cc;
+      }
+      button {
+        width: 100%;
+        background-color: #0088cc;
+        color: white;
+        border: none;
+        padding: 14px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      button:active {
+        background-color: #006699;
+      }
+      .hint {
+        font-size: 12px;
+        color: #888;
+        text-align: center;
+        margin-top: 12px;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div class="container">
-        <h2>Bluetooth Chek Chop Etish</h2>
-        
-        <div class="form-group">
-            <label for="shopName">Do'kon nomi:</label>
-            <input type="text" id="shopName" value="Mening Do'konim">
-        </div>
+      <h2>Bluetooth Chek Chop Etish</h2>
 
-        <div class="form-group">
-            <label for="receiptText">Chek matni:</label>
-            <textarea id="receiptText" rows="5">Mahsulot: Qahva (2x)
+      <div class="form-group">
+        <label for="shopName">Do'kon nomi:</label>
+        <input type="text" id="shopName" value="Mening Do'konim" />
+      </div>
+
+      <div class="form-group">
+        <label for="receiptText">Chek matni:</label>
+        <textarea id="receiptText" rows="5">
+Mahsulot: Qahva (2x)
 Narxi: 30,000 UZS
 ------------------
 Jami: 30,000 UZS
-Xaridingiz uchun rahmat!</textarea>
-        </div>
+Xaridingiz uchun rahmat!</textarea
+        >
+      </div>
 
-        <button onclick="sendToRawBT()">🖨️ Chop etish</button>
-        
-        <div class="hint">RawBT ilovasi o'rnatilgan va ulangan bo'lishi kerak.</div>
+      <button onclick="sendToRawBT()">🖨️ Chop etish</button>
+
+      <div class="hint">
+        RawBT ilovasi o'rnatilgan va ulangan bo'lishi kerak.
+      </div>
     </div>
 
     <script>
-        function sendToRawBT() {
-            // Inputlardan ma'lumotlarni yig'amiz
-            const shop = document.getElementById('shopName').value;
-            const text = document.getElementById('receiptText').value;
+      function sendToRawBT() {
+        // Inputlardan ma'lumotlarni yig'amiz
+        const shop = document.getElementById("shopName").value;
+        const text = document.getElementById("receiptText").value;
 
-            // Chop etiladigan yakuniy matnni shakllantiramiz (\n - yangi qator)
-            const fullText = `=== ${shop} ===\n\n${text}\n\n\n`;
+        // Chop etiladigan yakuniy matnni shakllantiramiz (\n - yangi qator)
+        const fullText = `=== ${shop} ===\n\n${text}\n\n\n`;
 
-            // Matnni URL formatiga o'tkazamiz
-            const encodedText = encodeURIComponent(fullText);
+        // Matnni URL formatiga o'tkazamiz
+        const encodedText = encodeURIComponent(fullText);
 
-            // RawBT Intent havolasini tuzamiz
-            const intentUrl = `intent:${encodedText}#Intent;scheme=rawbt;package=ru.a404.rawbt;end;`;
+        // RawBT Intent havolasini tuzamiz
+        const intentUrl = `intent:${encodedText}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;`;
 
-            // Brauzerni/WebApp'ni RawBT'ga yo'naltiramiz
-            window.location.href = intentUrl;
-        }
+        // Brauzerni/WebApp'ni RawBT'ga yo'naltiramiz
+        window.location.href = intentUrl;
+      }
     </script>
-
-</body>
+  </body>
 </html>
