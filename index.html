@@ -1,283 +1,127 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="uz">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <title>Inkassa & Printer App</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="style.css" />
-    <link rel="manifest" href="manifest.json" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluetooth Printer WebApp</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #111;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #555;
+        }
+        textarea, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            resize: vertical;
+        }
+        textarea:focus, input:focus {
+            border-color: #0088cc;
+        }
+        button {
+            width: 100%;
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:active {
+            background-color: #006699;
+        }
+        .hint {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
 
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  </head>
-  <body>
-    <div id="app-container">
-      <!-- HEADER -->
-      <header class="main-header">
-        <div class="logo-area">
-          <i class="fa-solid fa-print logo-icon"></i>
-          <h2>Inkassa App</h2>
+    <div class="container">
+        <h2>Bluetooth Chek Chop Etish</h2>
+        
+        <div class="form-group">
+            <label for="shopName">Do'kon nomi:</label>
+            <input type="text" id="shopName" value="Mening Do'konim">
         </div>
-        <div id="quickBleBadge" class="ble-badge disconnected">
-          <span class="ble-dot"></span>
-          <span id="quickBleText">Ulanmagan</span>
+
+        <div class="form-group">
+            <label for="receiptText">Chek matni:</label>
+            <textarea id="receiptText" rows="5">Mahsulot: Qahva (2x)
+Narxi: 30,000 UZS
+------------------
+Jami: 30,000 UZS
+Xaridingiz uchun rahmat!</textarea>
         </div>
-      </header>
 
-      <!-- VIEWS CONTAINER -->
-      <main id="views-container">
-        <!-- 1-OYNA: MARSHRUT -->
-        <section id="view-marshrut" class="view active">
-          <div class="view-header">
-            <div class="stats-card">
-              <span>Jami: <strong id="m-total">0</strong></span>
-              <span
-                >Bajarildi:
-                <strong id="m-done" class="text-success">0</strong></span
-              >
-              <span
-                >Qoldi:
-                <strong id="m-left" class="text-warning">0</strong></span
-              >
-            </div>
-            <div class="btn-group">
-              <button class="btn btn-primary" onclick="openSelectModal()">
-                <i class="fa-solid fa-list-check"></i> Belgilash
-              </button>
-              <button
-                class="btn btn-danger-outline"
-                onclick="clearMarshrutData()"
-              >
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </div>
-          </div>
-
-          <div id="marshrut-list" class="cards-list"></div>
-        </section>
-
-        <!-- 2-OYNA: TARIX -->
-        <section id="view-tarix" class="view">
-          <div class="view-header vertical">
-            <div class="history-summary">
-              <div>
-                <div class="summary-item">
-                  <span class="label">Jami inkassa:</span>
-                  <strong id="tarix-total-sum">0 so'm</strong>
-                </div>
-                <div class="summary-counts">
-                  <span
-                    >Inkassa: <strong id="tarix-success-count">0</strong></span
-                  >
-                  |
-                  <span>Nosoz: <strong id="tarix-broken-count">0</strong></span>
-                </div>
-              </div>
-
-              <button
-                class="btn btn-danger-outline"
-                onclick="clearTarixData()"
-                title="Tarixni tozalash"
-              >
-                <i class="fa-solid fa-trash"></i> Tozalash
-              </button>
-            </div>
-          </div>
-
-          <p class="swipe-hint">
-            <i class="fa-solid fa-hand-pointer"></i> O'ngdan chapga torting
-          </p>
-
-          <div id="tarix-list" class="cards-list"></div>
-        </section>
-
-        <!-- 3-OYNA: BAZA -->
-        <section id="view-baza" class="view">
-          <div class="card bluetooth-card">
-            <div class="ble-info-row">
-              <div class="ble-details">
-                <i class="fa-brands fa-bluetooth-b ble-big-icon"></i>
-                <div>
-                  <h4 id="bleDeviceName">Qurilma ulanmagan</h4>
-                  <p id="bleStatusText" class="sub-text">
-                    Bluetooth qurilmasiga ulaning
-                  </p>
-                </div>
-              </div>
-              <button
-                id="bleConnectBtn"
-                class="btn btn-ble"
-                onclick="toggleBluetoothConnection()"
-              >
-                Ulanish
-              </button>
-            </div>
-          </div>
-
-          <div class="card excel-card">
-            <div class="card-title">
-              <span
-                ><i class="fa-solid fa-file-excel"></i> Excel Baza
-                Management</span
-              >
-              <span class="badge" id="bazaTotalCount">0 ta</span>
-            </div>
-            <div class="excel-actions">
-              <button class="btn btn-success" onclick="triggerFileInput()">
-                <i class="fa-solid fa-file-import"></i> Import (.xlsx)
-              </button>
-              <button class="btn btn-danger" onclick="clearFullBase()">
-                <i class="fa-solid fa-trash-can"></i> Bazani Tozalash
-              </button>
-            </div>
-            <input
-              type="file"
-              id="excel-file-input"
-              accept=".xlsx, .xls, .csv"
-              style="display: none"
-            />
-          </div>
-
-          <h4 class="section-subtitle">Barcha Bankomatlar Ro'yxati</h4>
-          <div id="baza-list" class="cards-list"></div>
-        </section>
-      </main>
-
-      <!-- BOTTOM NAVIGATION -->
-      <nav class="bottom-nav">
-        <button class="nav-item active" data-target="view-marshrut">
-          <i class="fa-solid fa-route"></i>
-          <span>Marshrut</span>
-        </button>
-        <button class="nav-item" data-target="view-tarix">
-          <i class="fa-solid fa-clock-rotate-left"></i>
-          <span>Tarix</span>
-        </button>
-        <button class="nav-item" data-target="view-baza">
-          <i class="fa-solid fa-database"></i>
-          <span>Baza</span>
-        </button>
-      </nav>
+        <button onclick="sendToRawBT()">🖨️ Chop etish</button>
+        
+        <div class="hint">RawBT ilovasi o'rnatilgan va ulangan bo'lishi kerak.</div>
     </div>
 
-    <!-- MODALS -->
-    <div id="select-modal" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Marshrut uchun bankomatlarni tanlang</h3>
-          <button class="close-btn" onclick="closeSelectModal()">
-            &times;
-          </button>
-        </div>
-        <div id="select-checkbox-list" class="checkbox-list"></div>
-        <div class="modal-footer">
-          <button
-            class="btn btn-primary w-100"
-            onclick="saveSelectedMarshrut()"
-          >
-            Saqlash
-          </button>
-        </div>
-      </div>
-    </div>
+    <script>
+        function sendToRawBT() {
+            // Inputlardan ma'lumotlarni yig'amiz
+            const shop = document.getElementById('shopName').value;
+            const text = document.getElementById('receiptText').value;
 
-    <div id="inkassa-modal" class="modal hidden">
-      <div class="modal-content modal-small">
-        <h3 id="inkassaModalTitle">#101. Bankomat</h3>
-        <p class="modal-sub">Inkassa summasini kiriting:</p>
-        <input
-          type="text"
-          inputmode="numeric"
-          id="inkassaAmountInput"
-          class="modal-input"
-          placeholder="Summa (so'm)"
-          oninput="formatMoneyInput(this)"
-          autofocus
-        />
-        <div class="modal-footer grid-2">
-          <button
-            class="btn btn-success"
-            onclick="processInkassaAmountSubmit()"
-          >
-            Saqlash
-          </button>
-          <button class="btn btn-secondary" onclick="closeInkassaModal()">
-            Bekor qilish
-          </button>
-        </div>
-      </div>
-    </div>
+            // Chop etiladigan yakuniy matnni shakllantiramiz (\n - yangi qator)
+            const fullText = `=== ${shop} ===\n\n${text}\n\n\n`;
 
-    <div id="confirm-modal" class="modal hidden">
-      <div class="modal-content modal-small text-center">
-        <p
-          id="confirm-message"
-          style="margin-bottom: 16px; font-weight: 500; font-size: 1rem"
-        >
-          Ushbu amalni bajarmoqchimisiz?
-        </p>
-        <div class="modal-footer grid-2">
-          <button id="confirm-yes-btn" class="btn btn-primary">Ha</button>
-          <button onclick="closeConfirmModal()" class="btn btn-secondary">
-            Yo'q
-          </button>
-        </div>
-      </div>
-    </div>
+            // Matnni URL formatiga o'tkazamiz
+            const encodedText = encodeURIComponent(fullText);
 
-    <div id="print-confirm-modal" class="modal hidden">
-      <div class="modal-content modal-small text-center">
-        <h3>Chop etasizmi?</h3>
-        <div
-          id="printConfirmInfo"
-          style="
-            margin: 12px 0;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            color: #1e293b;
-          "
-        ></div>
-        <div class="modal-footer grid-2">
-          <button class="btn btn-primary" onclick="processPrintDecision(true)">
-            Ha
-          </button>
-          <button
-            class="btn btn-secondary"
-            onclick="processPrintDecision(false)"
-          >
-            Yo'q
-          </button>
-        </div>
-      </div>
-    </div>
+            // RawBT Intent havolasini tuzamiz
+            const intentUrl = `intent:${encodedText}#Intent;scheme=rawbt;package=ru.a404.rawbt;end;`;
 
-    <!-- BLUETOOTH QIDIRISH STATUS MODALI (YANGI) -->
-    <div id="ble-scanning-modal" class="modal hidden">
-      <div
-        class="modal-content modal-small text-center"
-        style="padding: 24px 16px"
-      >
-        <i
-          class="fa-solid fa-spinner fa-spin"
-          style="font-size: 2.5rem; color: #2563eb; margin-bottom: 12px"
-        ></i>
-        <h3 style="margin-bottom: 8px">Bluetooth qidirilmoqda</h3>
-        <p style="color: #64748b; font-size: 0.9rem">
-          Printer qurilmasini tanlang
-        </p>
-      </div>
-    </div>
+            // Brauzerni/WebApp'ni RawBT'ga yo'naltiramiz
+            window.location.href = intentUrl;
+        }
+    </script>
 
-    <div id="toast-notification" class="toast hidden"></div>
-    <canvas id="printCanvas" style="display: none"></canvas>
-
-    <script src="app.js"></script>
-  </body>
+</body>
 </html>
