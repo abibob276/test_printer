@@ -102,7 +102,28 @@
       };
 
       // Canvas'ni rasmga o'tkazib RawBT'ga yuborish
-      function printCanvasAsImage() {
+      function printReceipt() {
+        const canvas = document.getElementById("receiptCanvas");
+        const dataURL = canvas.toDataURL("image/png");
+
+        const intentUrl = `intent:${dataURL}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;`;
+
+        // Telegram ichida xatolik bermasligi uchun uni yashirincha a(link) orqali chaqiramiz
+        const link = document.createElement("a");
+        link.href = intentUrl;
+        document.body.appendChild(link);
+
+        try {
+          link.click();
+        } catch (e) {
+          // Agar ocholmasa, foydalanuvchiga tashqi brauzerga o'tishni tavsiya qilamiz
+          alert("Iltimos, sahifani brauzerda ochib chop eting.");
+        }
+
+        document.body.removeChild(link);
+      }
+
+      function printCanvasAsImage2() {
         const canvas = document.getElementById("receiptCanvas");
 
         // Canvas'ni Base64 rasm formatiga o'tkazamiz
